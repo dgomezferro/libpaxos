@@ -242,7 +242,7 @@ void sendbuf_send_leader_announce(udp_send_buffer * sb, short int leader_id) {
 //Flushes (sends) the current message in buffer, 
 // but only if the 'dirty' flag is set
 void sendbuf_flush(udp_send_buffer * sb) {
-    int cnt;
+    int cnt, i;
     
     //The dirty field is used to determine if something 
     // is in the buffer waiting to be sent
@@ -252,62 +252,78 @@ void sendbuf_flush(udp_send_buffer * sb) {
     
     //Send the current message in buffer
     paxos_msg * m = (paxos_msg *) &sb->buffer;
-    cnt = sendto(sb->sock,              //Sock
-        sb->buffer,                     //Data
-        PAXOS_MSG_SIZE(m),              //Data size
-        0,                              //Flags
-        (struct sockaddr *)&sb->addr,   //Addr
-        sizeof(struct sockaddr_in));    //Addr size
-        
-    if (cnt != (int)PAXOS_MSG_SIZE(m) || cnt == -1) {
-        perror("failed to send message");
+    for(i = 0; i < sb->sockets; ++i) {
+		cnt = sendto(sb->sock[i],              //Sock
+			sb->buffer,                     //Data
+			PAXOS_MSG_SIZE(m),              //Data size
+			0,                              //Flags
+			(struct sockaddr *)&sb->addr[i],   //Addr
+			sizeof(struct sockaddr_in));    //Addr size
+
+		if (cnt != (int)PAXOS_MSG_SIZE(m) || cnt == -1) {
+			perror("failed to send message");
+		}
     }
     LOG(DBG, ("Sent message of size %lu\n", PAXOS_MSG_SIZE(m)));
 }
 
 //Creates a new non-blocking UDP multicast sender for the given address/port
 //Returns NULL for error
-udp_send_buffer * udp_sendbuf_new(char* address_string, int port) {
+udp_send_buffer * udp_sendbuf_new(int connections, ...) {
+    va_list argp;
     
+    va_start(argp, connections);
+
     //Allocate and clear structure
     udp_send_buffer * sb  = PAX_MALLOC(sizeof(udp_send_buffer));
     memset(sb, 0, sizeof(udp_send_buffer));
 
-    struct sockaddr_in * addr_p = &sb->addr;
-        
-    // Set up socket 
-    sb->sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sb->sock < 0) {
-        perror("sender socket");
-        return NULL;
-    }
-    
-    // Set up address 
-    memset(addr_p, '\0', sizeof(struct sockaddr_in));
-    addr_p->sin_addr.s_addr = inet_addr(address_string);
-    if (addr_p->sin_addr.s_addr == INADDR_NONE) {
-        printf("Error setting addr\n");
-        return NULL;
-    }
-    addr_p->sin_family = AF_INET;
-    addr_p->sin_port = htons((uint16_t)port);	
-    // addrlen = sizeof(struct sockaddr_in);
-    
+    sb->sockets = connections;
+
+    int i;
+    for(i = 0; i < connections; ++i) {
+		struct sockaddr_in * addr_p = &sb->addr[i];
+
+		char *address_string = va_arg(argp, char*);
+		int port = va_arg(argp, int);
+
+		// Set up socket
+		sb->sock[i] = socket(AF_INET, SOCK_DGRAM, 0);
+		if (sb->sock[i] < 0) {
+			perror("sender socket");
+			return NULL;
+		}
+
+		// Set up address
+		memset(addr_p, '\0', sizeof(struct sockaddr_in));
+		addr_p->sin_addr.s_addr = inet_addr(address_string);
+		if (addr_p->sin_addr.s_addr == INADDR_NONE) {
+			printf("Error setting addr\n");
+			return NULL;
+		}
+		addr_p->sin_family = AF_INET;
+		addr_p->sin_port = htons((uint16_t)port);
+		// addrlen = sizeof(struct sockaddr_in);
+
 #ifdef PAXOS_UDP_SEND_NONBLOCK
-    // Set non-blocking 
-    int flag = fcntl(sb->sock, F_GETFL);
-    if(flag < 0) {
-        perror("fcntl1");
-        return NULL;
-    }
-    flag |= O_NONBLOCK;
-    if(fcntl(sb->sock, F_SETFL, flag) < 0) {
-        perror("fcntl2");
-        return NULL;
-    }
+		// Set non-blocking
+		int flag = fcntl(sb->sock[i], F_GETFL);
+		if(flag < 0) {
+			perror("fcntl1");
+			return NULL;
+		}
+		flag |= O_NONBLOCK;
+		if(fcntl(sb->sock[i], F_SETFL, flag) < 0) {
+			perror("fcntl2");
+			return NULL;
+		}
 #endif
 
-    LOG(DBG, ("Socket %d created for address %s:%d (send mode)\n", sb->sock, address_string, port));
+		LOG(DBG, ("Socket %d created for address %s:%d (send mode)\n", sb->sock[i], address_string, port));
+    }
+    
+    va_end(argp);
+    
     return sb;
 }
     

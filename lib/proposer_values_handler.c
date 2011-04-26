@@ -78,7 +78,7 @@ vh_init() {
     dropped_count = 0;
     
     // Start listening on net where clients send values
-    for_leader = udp_unicast_receiver_new(PAXOS_SUBMIT_NET);
+    for_leader = udp_receiver_new(PAXOS_SUBMIT_PORT);
     if (for_leader == NULL) {
         printf("Error creating proposer network receiver\n");
         return -1;

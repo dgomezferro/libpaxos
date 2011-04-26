@@ -137,7 +137,7 @@ int main (int argc, char const *argv[])
         return -1;
     }
     
-    for_oracle = udp_receiver_blocking_new(PAXOS_PINGS_NET);
+    for_oracle = udp_receiver_blocking_new(PAXOS_PINGS_PORT);
     if (for_oracle == NULL) {
         printf("Error creating proposers->oracle network receiver\n");
         return -1;

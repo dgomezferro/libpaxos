@@ -184,20 +184,33 @@
   the client is allowed to send submitted values.
   The fifth and sixth are reserved for leader election and failure detection
 */
-#define PAXOS_LEARNERS_NET  "239.0.0.1", 6001
-#define PAXOS_ACCEPTORS_NET "239.1.0.1", 6002
-#define PAXOS_PROPOSERS_NET "239.2.0.1", 6003
-//#define PAXOS_SUBMIT_NET    "239.3.0.1", 6004
-#define PAXOS_SUBMIT_NET    "127.0.0.1", 6004
-#define PAXOS_ORACLE_NET    "239.4.0.1", 6005
-#define PAXOS_PINGS_NET     "239.5.0.1", 6006
+//#define PAXOS_LEARNERS_NET  "239.0.0.1", 6001
+//#define PAXOS_ACCEPTORS_NET "239.1.0.1", 6002
+//#define PAXOS_PROPOSERS_NET "239.2.0.1", 6003
+////#define PAXOS_SUBMIT_NET    "239.3.0.1", 6004
+//#define PAXOS_SUBMIT_NET    "127.0.0.1", 6004
+//#define PAXOS_ORACLE_NET    "239.4.0.1", 6005
+//#define PAXOS_PINGS_NET     "239.5.0.1", 6006
+#define PAXOS_LEARNERS_NET  5, "10.78.36.211", 6001, "10.78.36.212", 6001, "10.78.36.213", 6001, "10.78.36.211", 6007, "10.78.36.215", 6001
+#define PAXOS_ACCEPTORS_NET 3, "10.78.36.211", 6002, "10.78.36.212", 6002, "10.78.36.213", 6002
+#define PAXOS_PROPOSERS_NET 1, "10.78.36.211", 6003
+#define PAXOS_SUBMIT_NET    1, "10.78.36.211", 6004
+#define PAXOS_ORACLE_NET    1, "239.4.0.1", 6005
+#define PAXOS_PINGS_NET     1, "239.5.0.1", 6006
+#define PAXOS_LEARNERS_PORT  6001
+#define PAXOS_LEARNERS_PROPOSER_PORT  6007
+#define PAXOS_ACCEPTORS_PORT 6002
+#define PAXOS_PROPOSERS_PORT 6003
+#define PAXOS_SUBMIT_PORT    6004
+#define PAXOS_ORACLE_PORT    6005
+#define PAXOS_PINGS_PORT     6006
 
 /*
   If defined, UDP sockets created (to send) are non-blocking.
   The send call may return before data is actually transmitted.
   Comment the definition below to make the send blocking.
 */
-// #define PAXOS_UDP_SEND_NONBLOCK
+#define PAXOS_UDP_SEND_NONBLOCK
 
 /*** STRUCTURES SETTINGS ***/
 

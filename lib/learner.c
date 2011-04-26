@@ -410,10 +410,13 @@ static int init_lea_network() {
     }
     
     // Message receive event
-    for_learner = udp_receiver_new(PAXOS_LEARNERS_NET);
+    for_learner = udp_receiver_new(PAXOS_LEARNERS_PORT);
     if (for_learner == NULL) {
-        printf("Error creating learner network receiver\n");
-        return LEARNER_ERROR;
+        for_learner = udp_receiver_new(PAXOS_LEARNERS_PROPOSER_PORT);
+        if (for_learner == NULL) {
+            printf("Error creating learner network receiver\n");
+            return LEARNER_ERROR;
+        }
     }
     event_set(&learner_msg_event, for_learner->sock, EV_READ|EV_PERSIST, lea_handle_newmsg, NULL);
     event_add(&learner_msg_event, NULL);

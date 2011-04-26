@@ -428,7 +428,7 @@ init_pro_network() {
     }
     
     // Message receive event
-    for_proposer = udp_receiver_new(PAXOS_PROPOSERS_NET);
+    for_proposer = udp_receiver_new(PAXOS_PROPOSERS_PORT);
     if (for_proposer == NULL) {
         printf("Error creating proposer network receiver\n");
         return PROPOSER_ERROR;
@@ -451,7 +451,7 @@ init_pro_fd_events() {
     }
     
     // Message receive event (from oracle)
-    from_oracle = udp_receiver_new(PAXOS_ORACLE_NET);
+    from_oracle = udp_receiver_new(PAXOS_ORACLE_PORT);
     if (from_oracle == NULL) {
         printf("Error creating oracle->proposer network receiver\n");
         return PROPOSER_ERROR;

@@ -5,13 +5,17 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <stdarg.h>
 
 #include "libpaxos_priv.h"
 #include "libpaxos_messages.h"
 
+#define MAX_NODES 10
+
 typedef struct udp_send_buffer_t {
-    int sock;
-    struct sockaddr_in addr;
+    int sock[MAX_NODES];
+    struct sockaddr_in addr[MAX_NODES];
+    int sockets;
     int dirty;
     // size_t bufsize;
     char buffer[MAX_UDP_MSG_SIZE];
@@ -24,7 +28,7 @@ typedef struct udp_receiver_t {
 } udp_receiver;
 
 
-udp_send_buffer * udp_sendbuf_new(char* address_string, int port);
+udp_send_buffer * udp_sendbuf_new(int connections, ...);
 void sendbuf_clear(udp_send_buffer * sb, paxos_msg_code type, short int sender_id);
 void sendbuf_flush(udp_send_buffer * sb);
 
@@ -37,8 +41,8 @@ void sendbuf_add_accept_req(udp_send_buffer * sb, iid_t iid, ballot_t ballot, ch
 void sendbuf_add_submit_val(udp_send_buffer * sb, char * value, size_t val_size);
 
 
-udp_receiver * udp_receiver_blocking_new(char* address_string, int port);
-udp_receiver * udp_receiver_new(char* address_string, int port);
+udp_receiver * udp_receiver_blocking_new(int port);
+udp_receiver * udp_receiver_new(int port);
 udp_receiver * udp_unicast_receiver_blocking_new(char* address_string, int port);
 udp_receiver * udp_unicast_receiver_new(char* address_string, int port);
 int udp_read_next_message(udp_receiver * recv_info);

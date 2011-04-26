@@ -396,7 +396,7 @@ init_acc_network() {
     }
     
     // Message receive event
-    for_acceptor = udp_receiver_new(PAXOS_ACCEPTORS_NET);
+    for_acceptor = udp_receiver_new(PAXOS_ACCEPTORS_PORT);
     if (for_acceptor == NULL) {
         printf("Error creating acceptor network receiver\n");
         return ACCEPTOR_ERROR;

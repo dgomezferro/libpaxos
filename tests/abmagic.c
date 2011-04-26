@@ -231,7 +231,7 @@ ab_init() {
     // }
 
     // Message from learners (repeat request) event
-    from_learners = udp_receiver_new(PAXOS_ACCEPTORS_NET);
+    from_learners = udp_receiver_new(PAXOS_ACCEPTORS_PORT);
     if (from_learners == NULL) {
         printf("Error creating network receiver\n");
         return -1;
@@ -241,7 +241,7 @@ ab_init() {
 
     
     // Message from client event
-    from_clients = udp_receiver_new(PAXOS_SUBMIT_NET);
+    from_clients = udp_receiver_new(PAXOS_SUBMIT_PORT);
     if (from_clients == NULL) {
         printf("Error creating network receiver\n");
         return -1;
